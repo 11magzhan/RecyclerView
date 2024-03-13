@@ -15,4 +15,10 @@
         android:fitsSystemWindows="true"
         app:menu="@menu/nav_drawer_menu" />
 
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.example.recyclerview.RecyclerFragment"/>
+
 </androidx.drawerlayout.widget.DrawerLayout>
