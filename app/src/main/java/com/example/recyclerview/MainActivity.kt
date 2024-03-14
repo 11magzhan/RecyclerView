@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "ListView", Toast.LENGTH_SHORT).show()
                 }
                 R.id.nav_recycler -> {
-
+                    Toast.makeText(this, "RecyclerView", Toast.LENGTH_SHORT).show()
                 }
             }
             true

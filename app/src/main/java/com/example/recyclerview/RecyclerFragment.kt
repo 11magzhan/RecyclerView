@@ -1,7 +1,9 @@
 package com.example.recyclerview
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -88,7 +90,23 @@ class RecyclerFragment : Fragment() {
         }
         cursor.close()
 
-        val adapter = ContactAdapter(contactList)
+        val adapter = ContactAdapter(contactList, object : UserActionsListener {
+            override fun onCallClicked(contact: ContactModel) {
+                openPhoneApp(contact.number)
+            }
+        })
         binding.recyclerView.adapter = adapter
+    }
+
+    private fun openPhoneApp(number: String) {
+        val intent = Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$number")
+        }
+        startActivity(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
