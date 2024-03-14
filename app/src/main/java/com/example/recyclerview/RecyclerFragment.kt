@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,23 +73,30 @@ class RecyclerFragment : Fragment() {
     private fun setContacts() {
         val contactList: ArrayList<ContactModel> = ArrayList()
         val cursor = requireActivity().contentResolver.query(
-            android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             null,
             null,
             null,
             null
         )
 
-        while (cursor!!.moveToNext()) {
-            contactList.add(
-                ContactModel(
-                    cursor.getString(cursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)),
-                    cursor.getString(cursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER)),
-                    //cursor.getString(cursor.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
-                )
-            )
+        cursor?.let {
+            if (it.moveToFirst()) {
+                do {
+                    val name = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                    val phoneNumber = it.getString(it.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    val avatarUri = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_URI))
+                    val contactInfo = ContactModel(
+                        photo = if (avatarUri != null) Uri.parse(avatarUri) else null,
+                        name = name,
+                        number = phoneNumber
+                    )
+                    contactList.add(contactInfo)
+                } while (it.moveToNext())
+            }
+            it.close()
         }
-        cursor.close()
+        cursor?.close()
 
         val adapter = ContactAdapter(contactList, object : UserActionsListener {
             override fun onCallClicked(contact: ContactModel) {

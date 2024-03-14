@@ -18,11 +18,11 @@ class ContactAdapter(val contactList: ArrayList<ContactModel>, private val actio
         fun bind(contact: ContactModel) {
             binding.tvName.text = contact.name
             binding.tvNumber.text = contact.number
-//            if (contact.photo != null) {
-//                binding.ivPhoto.setImageURI(Uri.parse(contact.photo))
-//            } else {
-//                binding.ivPhoto.setImageResource(R.drawable.phone_call)
-//            }
+            if (contact.photo != null) {
+                binding.ivPhoto.setImageURI(contact.photo)
+            } else {
+                binding.ivPhoto.setImageResource(R.drawable.phone_call)
+            }
         }
     }
 
