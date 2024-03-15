@@ -10,12 +10,16 @@ interface UserActionsListener {
     fun onCallClicked(contact: ContactModel)
 }
 
-class ContactAdapter(val contactList: ArrayList<ContactModel>, private val actionListener: UserActionsListener) :
-    RecyclerView.Adapter<ContactAdapter.ContactViewHolder>(), View.OnClickListener {
+class ContactAdapter(
+    private val contactList: ArrayList<ContactModel>,
+    private val actionListener: UserActionsListener
+) : RecyclerView.Adapter<ContactAdapter.ContactViewHolder>() {
 
-    inner class ContactViewHolder(val binding: ItemContactBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(contact: ContactModel) {
+    inner class ContactViewHolder(private val binding: ItemContactBinding) :
+        RecyclerView.ViewHolder(binding.root), View.OnClickListener {
+
+        fun bind(contact: ContactModel, position: Int) {
+            binding.root.setOnClickListener(this)
             binding.tvName.text = contact.name
             binding.tvNumber.text = contact.number
             if (contact.photo != null) {
@@ -23,22 +27,24 @@ class ContactAdapter(val contactList: ArrayList<ContactModel>, private val actio
             } else {
                 binding.ivPhoto.setImageResource(R.drawable.phone_call)
             }
+            binding.root.tag = position
+        }
+
+        override fun onClick(v: View?) {
+            val position = v?.tag as? Int ?: RecyclerView.NO_POSITION
+            if (position != RecyclerView.NO_POSITION) {
+                actionListener.onCallClicked(contactList[position])
+            }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val binding = ItemContactBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        binding.root.setOnClickListener(this)
         return ContactViewHolder(binding)
     }
 
     override fun getItemCount(): Int = contactList.size
 
-    override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
-        holder.bind(contactList[position])
-    }
+    override fun onBindViewHolder(holder: ContactViewHolder, position: Int) = holder.bind(contactList[position], position)
 
-    override fun onClick(v: View?) {
-        actionListener.onCallClicked(contactList[0])
-    }
 }
