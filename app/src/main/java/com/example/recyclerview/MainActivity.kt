@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
 import com.example.recyclerview.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var toggle: ActionBarDrawerToggle
+    private val recyclerFragment = RecyclerFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +35,9 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "ListView", Toast.LENGTH_SHORT).show()
                 }
                 R.id.nav_recycler -> {
-                    Toast.makeText(this, "RecyclerView", Toast.LENGTH_SHORT).show()
+                    supportFragmentManager.beginTransaction().replace(R.id.container, recyclerFragment).commit().also { binding.drawerLayout.closeDrawer(
+                        GravityCompat.START)
+                    }
                 }
             }
             true

@@ -1,11 +1,9 @@
 package com.example.recyclerview
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,19 +18,18 @@ class RecyclerFragment : Fragment() {
 
     private var _binding: FragmentRecyclerBinding? = null
     private val binding get() = _binding!!
+    private val adapter by lazy { ContactAdapter(::openPhoneApp) }
+    private val contactProvider by lazy { ContactProvider(requireActivity().application) }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecyclerBinding.inflate(inflater, container, false)
+        binding.recyclerView.adapter = adapter
         checkContactPermission()
         return binding.root
-
     }
 
     private fun checkContactPermission() {
@@ -69,46 +66,13 @@ class RecyclerFragment : Fragment() {
         }
     }
 
-    @SuppressLint("Range")
     private fun setContacts() {
-        val contactList: ArrayList<ContactModel> = ArrayList()
-        val cursor = requireActivity().contentResolver.query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            null,
-            null,
-            null,
-            null
-        )
-
-        cursor?.let {
-            if (it.moveToFirst()) {
-                do {
-                    val name = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
-                    val phoneNumber = it.getString(it.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    val avatarUri = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_URI))
-                    val contactInfo = ContactModel(
-                        photo = if (avatarUri != null) Uri.parse(avatarUri) else null,
-                        name = name,
-                        number = phoneNumber
-                    )
-                    contactList.add(contactInfo)
-                } while (it.moveToNext())
-            }
-            it.close()
-        }
-        cursor?.close()
-
-        val adapter = ContactAdapter(contactList, object : UserActionsListener {
-            override fun onCallClicked(contact: ContactModel) {
-                openPhoneApp(contact.number)
-            }
-        })
-        binding.recyclerView.adapter = adapter
+        adapter.setItems(contactProvider.getContacts())
     }
 
-    private fun openPhoneApp(number: String) {
+    private fun openPhoneApp(contactModel: ContactModel) {
         val intent = Intent(Intent.ACTION_DIAL).apply {
-            data = Uri.parse("tel:$number")
+            data = Uri.parse("tel:${contactModel.number}")
         }
         startActivity(intent)
     }
